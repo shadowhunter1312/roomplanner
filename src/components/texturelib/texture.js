@@ -98,7 +98,7 @@ const Sidebar = ({  onTextureSelect, onClose }) => {
   }, [selectedCatalogue, data]);
 
   const handleTextureSelect = (texture) => {
-    onTextureSelect({ value: 'Rubber_Floor_001', index: 1 });
+    onTextureSelect({ value: 'Terrazzo_Tiles_002', index: 4 });
   };
 
   const handleClose = () => {

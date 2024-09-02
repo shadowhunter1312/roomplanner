@@ -54,7 +54,9 @@ export const defaultFloorTexture = {
     colormap: 'TextureSources/textures/Floor/Stone_Tiles_004/Stone_Tiles_004_basecolor.jpg',
     roughnessmap: 'TextureSources/textures/Floor/Stone_Tiles_004/Stone_Tiles_004_roughness.jpg',
     normalmap: 'TextureSources/textures/Floor/Stone_Tiles_004/Stone_Tiles_004_normal.jpg',
-    rotation: TEXTURE_DEFAULT_ROTATION
+    rotation: TEXTURE_DEFAULT_ROTATION,
+    sizex:800,
+    sizey:1600
 };
 
 export const TEXTURE_PROPERTY_COLOR = 'color';

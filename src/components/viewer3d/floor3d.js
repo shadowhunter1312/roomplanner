@@ -1,17 +1,17 @@
-import { EventDispatcher, FrontSide, DoubleSide, Vector2, Vector3, Shape, ShapeGeometry, Mesh, PointLight, BackSide, MaxEquation } from 'three';
+import { EventDispatcher, FrontSide, DoubleSide, Vector2, Vector3, Shape, ShapeGeometry, Mesh, PointLight } from 'three';
 import { EVENT_CHANGED, EVENT_UPDATE_TEXTURES, EVENT_ROOM_ATTRIBUTES_CHANGED, EVENT_MODIFY_TEXTURE_ATTRIBUTE } from '../core/events.js';
 import { MeshStandardMaterial } from 'three';
-import {Utils} from '../core/utils.js'
+// import {Utils} from '../core/utils.js'
 import { FloorMaterial3D } from '../materials/FloorMaterial3D.js';
 import { TEXTURE_PROPERTY_COLOR, TEXTURE_PROPERTY_REPEAT, TEXTURE_PROPERTY_ROTATE, TEXTURE_PROPERTY_REFLECTIVE, TEXTURE_PROPERTY_SHININESS } from '../core/constants.js';
-import { PointLightHelper } from 'three';
-import { ShapeUtils } from 'three';
-import { BufferGeometry } from 'three';
-import { SpotLight } from 'three';
+// import { PointLightHelper } from 'three';
+// import { ShapeUtils } from 'three';
+// import { BufferGeometry } from 'three';
+// import { SpotLight } from 'three';
 import { Box3 } from 'three';
 
 import * as THREE from 'three'
-
+import { TiledMaterial } from '../materials/Shader.js';
 export class Floor3D extends EventDispatcher {
     constructor(scene, room, controls, opts) {
         super();
@@ -29,6 +29,7 @@ export class Floor3D extends EventDispatcher {
         this.controls = controls;
         this.roomLight = null;
         this.roomLightHelper = null;
+        this.roomhemiLight = null;
         this.floorPlane = null;
         this.roofPlane = null;
         this.changedevent = this.redraw.bind(this);
@@ -64,8 +65,18 @@ export class Floor3D extends EventDispatcher {
             let floorSize = this.room.floorRectangleSize.clone();
             let texturePack = this.room.getTexture();
             if (!this.__floorMaterial3D) {
+
+                const materialParameters = {
+                    groutColor: 0x555555, // Example grout color
+                    groutWidth: 0.00609,      // Example grout width
+                    repeat: 20,            // Repeat pattern
+                    tileSize: 20,         // Tile size
+                  };
+                  
                 // this.__floorMaterial3D = new MeshStandardMaterial({ color: texturePack.color, side: DoubleSide });
-                this.__floorMaterial3D = new FloorMaterial3D({ color: texturePack.color, side: DoubleSide, wireframe: false }, texturePack, this.scene);
+              this.__floorMaterial3D = new FloorMaterial3D({ size:floorSize, color: texturePack.color, side: DoubleSide, wireframe: false }, texturePack, this.scene);
+              //  this.__floorMaterial3D = new TiledMaterial(materialParameters, texturePack, this.scene);
+
             }
             this.__floorMaterial3D.textureMapPack = texturePack;
             //this.__floorMaterial3D.updateDimensions(floorSize.x, floorSize.y);
@@ -112,6 +123,7 @@ export class Floor3D extends EventDispatcher {
         this.removeFromScene();
         this.roomLight = this.addRoomLight();
         this.floorPlane = this.buildFloor();
+        this.roomhemiLight= this.addroomhemilight();
         // this.floorPlane.position.y = 2;
         this.roofPlane = this.buildRoofVaryingHeight();
         // console.log(this.roofPlane);
@@ -120,7 +132,7 @@ export class Floor3D extends EventDispatcher {
 
     addRoomLight(){
         let position = new Vector3(this.room.areaCenter.x, 250, this.room.areaCenter.y);
-        let light = new PointLight(0xFFFFFF,400000, 1000);
+        let light = new PointLight(0xFFFFFF,120000, 800);
         //this.roomLightHelper = new PointLightHelper(light, 50);
         light.shadow.mapSize = new Vector2(2048, 2048);
         light.shadow.bias = -0.0005;
@@ -130,7 +142,11 @@ export class Floor3D extends EventDispatcher {
         // light.target.copy(light.position);
         return light;
     }
-
+  addroomhemilight(){
+    const light2 = new THREE.HemisphereLight( 0xFFFFFF, 0xFFFFFF, 2 );
+    light2.position.set( 0, 50, 0 );
+    return light2;
+  }
     buildFloor() {
         let points = [];
         let min = new Vector2(Number.MAX_VALUE, Number.MAX_VALUE);
@@ -143,6 +159,8 @@ export class Floor3D extends EventDispatcher {
         let floorSize = this.room.floorRectangleSize.clone();
         let shape = new Shape(points);
         let useGeometry = new ShapeGeometry(shape);
+
+ 
         let positionAttribute = null;
         let uvAttribute = null;
         let box3 = null;
@@ -204,7 +222,7 @@ export class Floor3D extends EventDispatcher {
             let cornerIndex;
             let corner;
             let interiorCorner;
-            vertices.setZ(i, vertices.getY(i));           
+            vertices.setZ(i, vertices.getY(i));
             /**
              * The threejs vertex ordering is messed up so we need to iterate through all corners 
              * to find which is closest and assign its elevation to this vertex
@@ -226,11 +244,7 @@ export class Floor3D extends EventDispatcher {
     }
 
     addToScene() {
-        const hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1.5 );
-        hemiLight.color.set(0xffffff); // Set hemiLight color to white
-        hemiLight.groundColor.set(0xffffff);
-        hemiLight.position.set( 0, 470, 0 );
-       this.scene.add(  hemiLight );
+       this.scene.add(this.roomhemiLight)
         this.scene.add(this.roomLight);
        // this.scene.add(this.roomLightHelper);
         this.scene.add(this.floorPlane);
@@ -242,6 +256,7 @@ export class Floor3D extends EventDispatcher {
     }
 
     removeFromScene() {
+        this.scene.remove(this.roomhemiLight)
         this.scene.remove(this.roomLight);
       //  this.scene.remove(this.roomLightHelper);
         this.scene.remove(this.floorPlane);

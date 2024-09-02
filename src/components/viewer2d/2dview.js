@@ -122,7 +122,7 @@ class Viewer2D extends Component {
 
         this.viewapp.__floorplanContainer.addChild(origin);
 
-        //this.viewapp.__floorplanContainer.addChild(this.viewapp._grid);
+        this.viewapp.__floorplanContainer.addChild(this.viewapp._grid);
         this.viewapp.__floorplanContainer.addChild(this.viewapp.__floorplanElementsHolder);
         this.viewapp.__boundaryHolder = new Graphics();
         this.viewapp.__floorplanContainer.addChild(this.viewapp.__boundaryHolder);
@@ -215,7 +215,7 @@ class Viewer2D extends Component {
         let zoom = this.viewapp.__floorplanContainer.scale.x;
         let bounds = Dimensioning.cmToPixel(Configuration.getNumericValue(viewBounds));// * zoom;
         let maxZoomOut = Math.max(window.innerWidth, window.innerHeight) / bounds;
-        zoom = (zoom < maxZoomOut) ? maxZoomOut : (zoom > 50) ? 50 : zoom;
+        zoom = (zoom < maxZoomOut) ? maxZoomOut : (zoom > 30) ? 30 : zoom;
 
         this.viewapp.__floorplanContainer.scale.x = this.viewapp.__floorplanContainer.scale.y = zoom;
         this.viewapp.__tempWallHolder.scale.x = this.viewapp.__tempWallHolder.scale.y = zoom;

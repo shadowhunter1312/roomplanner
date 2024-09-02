@@ -363,7 +363,9 @@
                 "color": "#FFFFFF",
                 "emissive": "#000000",
                 "reflective": 0.5,
-                "shininess": 0.5
+                "shininess": 0.5,
+                "sizex":800,
+        "sizey":1600
             },
             "3bec1535-21a7-668e-5d47-229db4d136d2,4e3d65cb-54c0-0681-28bf-bddcc7bdb571,da026c08-d76a-a944-8e7b-096b752da9ed,e3a9cbc3-c4a3-9f90-08f5-d00b6036d79a,fed350d6-a751-1f3d-f6ec-eaa27de6bd12": {
                 "color": "#FFFFFF",
@@ -375,7 +377,9 @@
                 "normalmap": "TextureSources/textures/Floor/Stone_Tiles_004/Stone_Tiles_004_normal.jpg",
                 "rotation": 0,
                 "reflective": 0.5,
-                "shininess": 0.5
+                "shininess": 0.5,
+                "sizex":800,
+        "sizey":1600
             }
         },
         "carbonSheet": {},

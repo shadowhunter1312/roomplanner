@@ -13,7 +13,7 @@ import {
     EVENT_NEW_ROOMS_ADDED,
 } from '../core/events.js';
 import { DragRoomItemsControl3D } from './DragRoomItemsControl3D.js';
-import { Configuration, viewBounds } from '../core/configuration.js';
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Skybox } from './skybox.js';
 import { Physical3DItem } from './Physical3DItem.js';
@@ -58,7 +58,7 @@ class Viewer3D extends THREE.Scene {
     this.__environmentCamera = null;
 
     this.cameraNear = 10;
-    this.cameraFar = 100000;
+    this.cameraFar = 90000;
     this.controls = null;
 
     this.renderer = null;
@@ -101,7 +101,7 @@ class Viewer3D extends THREE.Scene {
         let scope = this;
         scope.scene = new THREE.Scene();
         this.name = 'Scene';
-        scope.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, scope.cameraNear, scope.cameraFar);
+        scope.camera = new THREE.PerspectiveCamera(45,( window.innerWidth / window.innerHeight), scope.cameraNear, scope.cameraFar);
      //   let cubeRenderTarget = new WebGLCubeRenderTarget(16, { format: RGBFormat, generateMipmaps: true, minFilter: LinearMipmapLinearFilter });
         scope.__environmentCamera =  new THREE.CubeCamera(1, 100000, new THREE.WebGLCubeRenderTarget(16, {
             format: THREE.RGBAFormat,
@@ -117,18 +117,45 @@ class Viewer3D extends THREE.Scene {
         scope.controls = new OrbitControls(scope.camera, scope.domElement);
 
         // scope.controls.autoRotate = this.__options['spin'];
-        scope.controls.enableDamping = false;
-        scope.controls.dampingFactor = 0.1;
-        scope.controls.maxPolarAngle = Math.PI * 1.0; //Math.PI * 0.35;//Math.PI * 1.0; //
-        scope.controls.maxDistance = Configuration.getNumericValue(viewBounds);// 7500; //2500
+        scope.controls.enableDamping = true;
+        scope.controls.dampingFactor = 0.1;  // Adjust damping factor for smoother movement
+        scope.controls.maxPolarAngle = Math.PI / 2; 
+        scope.controls.minPolarAngle = Math.PI / 15;//Math.PI * 0.35;//Math.PI * 1.0; //
+        scope.controls.maxDistance = 3500;// 7500; //2500
         scope.controls.minDistance = 100; //1000; //1000
         scope.controls.screenSpacePanning = true;
 
         scope.skybox = new Skybox(this, scope.renderer);
-        scope.camera.position.set(0, 600, 1500);
+        scope.camera.position.set(0, 600, 1100);
+        
+
+        scope.bounds = {
+            minX: -3800,
+            maxX: 3800,
+            minY: 20,
+            maxY: 4006,
+            minZ: -3960,
+            maxZ: 3900
+        };
+        
+        // Smooth clamping function
+        // function smoothClamp(value, min, max, smoothingFactor = 0.5) {
+        //     if (value < min) return smoothingFactor * value + (1 - smoothingFactor) * min;
+        //     if (value > max) return smoothingFactor * value + (1 - smoothingFactor) * max;
+        //     return value;
+        // }
+        
+        // Restrict camera movement within bounds
+        scope.controls.addEventListener('change', () => {
+            scope.camera.position.x = Math.max( scope.bounds.minX, Math.min( scope.bounds.maxX,  scope.camera.position.x));
+            scope.camera.position.y = Math.max( scope.bounds.minY, Math.min( scope.bounds.maxY,  scope.camera.position.y));
+            scope.camera.position.z = Math.max( scope.bounds.minZ, Math.min( scope.bounds.maxZ,  scope.camera.position.z));
+        
+            // No need to set these every time; they are already set
+           
+        });
+
         scope.controls.update();
-
-
         scope.axes = new THREE.AxesHelper(500);  
 
         // handle window resizing
@@ -199,7 +226,7 @@ class Viewer3D extends THREE.Scene {
         this.__currentItemSelected = evt.item;
         this.__currentItemSelected.selected = true;
         this.needsUpdate = true;
-        if (this.__currentItemSelected.itemModel != undefined) {
+        if (this.__currentItemSelected.itemModel !== undefined) {
             evt.itemModel = this.__currentItemSelected.itemModel;
         }
         this.dispatchEvent(evt);
@@ -250,7 +277,7 @@ class Viewer3D extends THREE.Scene {
     addRoomItems(evt) {
   
         let i = 0;
-        let j = 0;
+       
         for (; i < this.__physicalRoomItems.length; i++) {
             this.__physicalRoomItems[i].dispose();
             this.remove(this.__physicalRoomItems[i]);

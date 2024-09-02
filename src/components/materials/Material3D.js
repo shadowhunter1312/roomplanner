@@ -2,12 +2,16 @@ import { MeshStandardMaterial, TextureLoader, RepeatWrapping, Color, Vector2, Cu
 import { TEXTURE_DEFAULT_REPEAT,TEXTURE_DEFAULT_REFLECTIVE, TEXTURE_DEFAULT_SHININESS } from '../core/constants';
 import { MeshPhysicalMaterial } from 'three';
 import * as THREE from 'three'
+import { CanvasTexture } from 'three';
 
 import { TiledShaderMaterial } from './Shader';
+import { wrap } from 'gsap';
 export class Material3D extends MeshPhysicalMaterial {
     constructor(parameters, textureMapPack, scene, reflectsScene = false) {
         super(parameters);
         this.__scene = scene;
+
+     this.floorsize=parameters.size
         this.__reflectsScene = reflectsScene;
         this.__mirrorCamera = null;
         textureMapPack = (textureMapPack) ? textureMapPack : {};
@@ -43,30 +47,64 @@ export class Material3D extends MeshPhysicalMaterial {
         // this.__applyNewTextures();
         // this.normalScale.set(-10, 10);
         this.textureMapPack = textureMapPack;
+        this.tilesizex=null;
+        this.tilesizey=null;
     }
 
     __updateColorMap(texture) {
+   
+       
 
-        // this.__groutColor = 'black';
-        // this.__groutWidth = 0.1;
 
+if(this.__textureMapPack.sizex)
+    {
+        this.tilesizex=this.__textureMapPack.sizex;
+        this.tilesizey=this.__textureMapPack.sizey;
+    }else{
+        this.tilesizex=2300;
+        this.tilesizey=1600;
+    }
+const tileu= this.floorsize.x*10/this.tilesizex;
+const tilev= this.floorsize.y*10/this.tilesizey;
+const groutColor="#000"
+const groutSize=2
+const canvas = document.createElement('canvas');
+    canvas.width = this.tilesizex;
+    canvas.height = this.tilesizey;
+    const ctx = canvas.getContext('2d');
+
+    // Draw grout (border)
+    ctx.fillStyle = groutColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const image = new Image();
+    image.src = this.__textureMapPack.colormap;
+   
+    image.onload = () => {
+      const innerSizex = this.tilesizex - groutSize * 2;
+      const innerSizey = this.tilesizey - groutSize * 2;
+      ctx.drawImage(image, groutSize, groutSize, innerSizex, innerSizey);
+
+      // Create texture from the canvas after the image is loaded
+      const texture1 = new CanvasTexture(canvas);
+      texture1.wrapS=texture1.wrapT=RepeatWrapping;
+     // texture1.repeat.set(this.__uRatio, this.__vRatio);
+      texture1.repeat.set(tileu, tilev);
+     
+      texture1.colorSpace=THREE.SRGBColorSpace;
+     
+      this.map = texture1;
+
+    }
         // if (this.__colorTexture) {
-        //     this.map = new TiledShaderMaterial(
-        //         this.__colorTexture,
-        //         this.__groutColor,
-        //         this.__groutWidth,
-        //         new Vector2(this.__uRatio, this.__vRatio)
-        //     );
+        //     if(this.__colorTexture.image){
+        //         this.__colorTexture.colorSpace =THREE.SRGBColorSpace ;
+        //         this.__colorTexture.wrapS = this.__colorTexture.wrapT = RepeatWrapping;
+        //         this.__colorTexture.repeat.set(this.__uRatio, this.__vRatio);
+        //         this.__colorTexture.needsUpdate = true;
+        //         this.map = this.__colorTexture;
+        //     }
         // }
-        if (this.__colorTexture) {
-            if(this.__colorTexture.image){
-                this.__colorTexture.colorSpace =THREE.SRGBColorSpace ;
-                this.__colorTexture.wrapS = this.__colorTexture.wrapT = RepeatWrapping;
-                this.__colorTexture.repeat.set(this.__uRatio, this.__vRatio);
-                this.__colorTexture.needsUpdate = true;
-                this.map = this.__colorTexture;
-            }
-        }
        this.__updateTextures();
     }
 
@@ -146,7 +184,7 @@ export class Material3D extends MeshPhysicalMaterial {
     }
 
     __applyNewTextures() {
-        this.map = this.__colorTexture = null;
+        this.map  = null;
         this.normalMap = this.__normalTexture = null;
         this.roughnessMap = this.__roughnessTexture = null;
         this.aoMap = this.__ambientTexture = null;
@@ -159,37 +197,37 @@ export class Material3D extends MeshPhysicalMaterial {
         if (this.__textureMapPack.colormap) {
             loader.load(this.__textureMapPack.colormap, (texture) => {
                 this.__colorTexture = texture;
-                this.__updateColorMap(texture);
+                this.__updateColorMap(this.__textureMapPack.colormap);
             });
         }
-        if (this.__textureMapPack.normalmap) {
-            this.__normalTexture = loader.load(this.__textureMapPack.normalmap,(texture) => {
+        // if (this.__textureMapPack.normalmap) {
+        //     this.__normalTexture = loader.load(this.__textureMapPack.normalmap,(texture) => {
                
-                this.__updateNormalMap(texture);
-            }, undefined, (err) => {
-                console.error('An error happened loading the normal map.', err);
-            });
-            this.__updateNormalMap(this.__normalTexture)
+        //         this.__updateNormalMap(texture);
+        //     }, undefined, (err) => {
+        //         console.error('An error happened loading the normal map.', err);
+        //     });
+        //     this.__updateNormalMap(this.__normalTexture)
            
-        }
-        if (this.__textureMapPack.roughnessmap) {
-            loader.load(this.__textureMapPack.roughnessmap, (texture) => {
-                this.__roughnessTexture = texture;
-                this.__updateRoughnessMap(texture);
-            });
-        }
-        if (this.__textureMapPack.ambientmap) {
-            loader.load(this.__textureMapPack.ambientmap, (texture) => {
-                this.__ambientTexture = texture;
-                this.__updateAmbientMap(texture);
-            });
-        }
-        if (this.__textureMapPack.metalmap) {
-            loader.load(this.__textureMapPack.metalmap, (texture) => {
-                this.__metalTexture = texture;
-                this.__updateMetallicMap(texture);
-            });
-        }
+        // }
+        // if (this.__textureMapPack.roughnessmap) {
+        //     loader.load(this.__textureMapPack.roughnessmap, (texture) => {
+        //         this.__roughnessTexture = texture;
+        //         this.__updateRoughnessMap(texture);
+        //     });
+        // }
+        // if (this.__textureMapPack.ambientmap) {
+        //     loader.load(this.__textureMapPack.ambientmap, (texture) => {
+        //         this.__ambientTexture = texture;
+        //         this.__updateAmbientMap(texture);
+        //     });
+        // }
+        // if (this.__textureMapPack.metalmap) {
+        //     loader.load(this.__textureMapPack.metalmap, (texture) => {
+        //         this.__metalTexture = texture;
+        //         this.__updateMetallicMap(texture);
+        //     });
+        // }
         // if (this.__textureMapPack.bumpmap) {
         //     console.log('APPLY DISPLACEMENT MAP ::: ');
         //     this.__bumpTexture = new TextureLoader().load(this.__textureMapPack.bumpmap, this.__updateTextures.bind(this));
@@ -204,11 +242,11 @@ export class Material3D extends MeshPhysicalMaterial {
         this.__vRatio = vRatio;
 
         this.__updateColorMap();
-        this.__updateNormalMap();
-        this.__updateRoughnessMap();
-        this.__updateMetallicMap();
-        this.__updateAmbientMap();
-        this.__updateBumpMap();
+        // this.__updateNormalMap();
+        // this.__updateRoughnessMap();
+        // this.__updateMetallicMap();
+        // this.__updateAmbientMap();
+        // this.__updateBumpMap();
 
         // this.__updateTextures();
         // this.needsUpdate = true;
@@ -235,6 +273,7 @@ export class Material3D extends MeshPhysicalMaterial {
                 if (obj) {
                     if (obj.texture !== '') {
                         let repeat = (obj.repeat) ? obj.repeat : 1;
+                        console.log(repeat)
                         let txt = new TextureLoader().load(obj.texture);
                         txt.colorSpace=THREE.SRGBColorSpace;
                         txt.wrapS = RepeatWrapping;

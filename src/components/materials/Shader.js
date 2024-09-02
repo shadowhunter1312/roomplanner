@@ -1,49 +1,59 @@
-import { ShaderMaterial, Color, RepeatWrapping } from 'three';
+import {
+  MeshPhysicalMaterial,
+  Vector2,
+  Color,
+  TextureLoader,
+  RepeatWrapping,
+  CanvasTexture,
+  DoubleSide, // Import DoubleSide
+} from 'three';
 
-const vertexShader = `
-  varying vec2 vUv;
-
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const fragmentShader = `
-  uniform sampler2D colorMap;
-  uniform float groutWidth;
-  uniform vec3 groutColor;
-  uniform vec2 repeat;
-
-  varying vec2 vUv;
-
-  void main() {
-    vec2 uv = vUv * repeat;
-    vec2 grout = step(vec2(groutWidth), fract(uv));
-    float groutMask = max(grout.x, grout.y);
-
-    vec3 color = texture2D(colorMap, vUv).rgb;
-    vec3 finalColor = mix(groutColor, color, groutMask);
-
-    gl_FragColor = vec4(finalColor, 1.0);
-  }
-`;
-
-export class TiledShaderMaterial extends ShaderMaterial {
-  constructor(colorTexture, groutColor, groutWidth, repeat) {
+export class TiledMaterial extends MeshPhysicalMaterial {
+  constructor(parameters, textureMapPack, scene) {
     super({
-      uniforms: {
-        colorMap: { value: colorTexture },
-        groutWidth: { value: groutWidth },
-        groutColor: { value: new Color(groutColor) },
-        repeat: { value: repeat }
-      },
-      vertexShader,
-      fragmentShader,
-      transparent: false
-    });
+      side: DoubleSide, // Enable backface rendering
 
-    colorTexture.wrapS = RepeatWrapping;
-    colorTexture.wrapT = RepeatWrapping;
+    });
+    console.log("2222")
+    this.textureMapPack = textureMapPack || {};
+    this.__scene = scene;
+  this.createTileTexture('#ffffff', '#333333', 256, 2,this.textureMapPack.colormap);
+ console.log(this.textureMapPack)
+    // Load textures
+     // Function to create the tile texture with a grout line
+
+
+    // Set initial properties
+
   }
+
+  createTileTexture(tileColor, groutColor, tileSize,groutSize,imageSrc) {
+    const canvas = document.createElement('canvas');
+    canvas.width = tileSize;
+    canvas.height = tileSize;
+    const ctx = canvas.getContext('2d');
+
+    // Draw grout (border)
+    ctx.fillStyle = groutColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const image = new Image();
+    image.src = imageSrc;
+    image.onload = () => {
+      const innerSize = tileSize - groutSize * 2;
+      ctx.drawImage(image, groutSize, groutSize, innerSize, innerSize);
+
+      // Create texture from the canvas after the image is loaded
+      const texture = new CanvasTexture(canvas);
+      texture.wrapS = texture.wrapT = RepeatWrapping;
+      texture.repeat.set(5, 5);  // Adjust repetition as needed
+  // Adjust the repeat to your needs
+  this.map = texture;
+      this.needsUpdate = true;
+      this.__scene.needsUpdate = true;
+    }
+    
+  }
+
+
 }

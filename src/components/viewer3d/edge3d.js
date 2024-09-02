@@ -70,7 +70,7 @@ export class Edge3D extends EventDispatcher {
                 if (!texturePack.color) {
                     texturePack.color = '#FF0000';
                 }
-                this.__wallMaterial3D = new WallMaterial3D({ color: texturePack.color, side: side, transparent: true, wireframe: false }, texturePack, this.scene);
+                this.__wallMaterial3D = new WallMaterial3D({ size:new Vector2(width, height), color: texturePack.color, side: side, transparent: true, wireframe: false }, texturePack, this.scene);
             }
             this.__wallMaterial3D.textureMapPack = texturePack;
             this.__wallMaterial3D.dimensions = new Vector2(width, height);
