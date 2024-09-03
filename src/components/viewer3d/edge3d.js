@@ -1,4 +1,4 @@
-import { EventDispatcher, Vector2, Vector3,MeshBasicMaterial, MeshStandardMaterial, FrontSide, DoubleSide, BackSide, Shape, Path, ShapeGeometry, Mesh, ExtrudeGeometry } from 'three';
+import { EventDispatcher, Vector2, Vector3,MeshBasicMaterial, MeshStandardMaterial, FrontSide, DoubleSide, BackSide, Shape, Path, ShapeGeometry, Mesh } from 'three';
 // import { SubdivisionModifier } from 'three/examples/jsm/modifiers/SubdivisionModifier';
 import { Utils } from '../core/utils.js';
 import { EVENT_REDRAW, EVENT_UPDATE_TEXTURES, EVENT_DELETED, EVENT_MODIFY_TEXTURE_ATTRIBUTE, EVENT_CAMERA_ACTIVE_STATUS, EVENT_NEW_ITEM, EVENT_ITEM_REMOVED } from '../core/events.js';

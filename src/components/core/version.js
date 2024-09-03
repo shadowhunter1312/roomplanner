@@ -1,10 +1,10 @@
 export class Version {
     static isVersionHigherThan(version, checkVersion) {
-        if (version != undefined) {
+        if (version !== undefined) {
             checkVersion = checkVersion.replace(/[^\d.-]/g, '').split('.');
             var givenVersion = version.replace(/[^\d.-]/g, '').split('.');
             var flag = true;
-            if (checkVersion.length != givenVersion.length) {
+            if (checkVersion.length !== givenVersion.length) {
                 return false;
             }
             for (var i = 0; i < checkVersion.length; i++) {

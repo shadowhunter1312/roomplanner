@@ -1,7 +1,7 @@
 import { EventDispatcher, Vector2, Vector3, Matrix4, Mesh, MeshStandardMaterial, Box3, BufferGeometry, Plane } from 'three';
-import { EVENT_REDRAW, EVENT_MOVED, EVENT_UPDATED, EVENT_UPDATE_TEXTURES, EVENT_DELETED, EVENT_MODIFY_TEXTURE_ATTRIBUTE, EVENT_CHANGED, EVENT_NEW_ITEM, EVENT_ITEM_REMOVED, EVENT_ITEM_MOVE } from '../core/events.js';
+import { EVENT_REDRAW, EVENT_MOVED, EVENT_UPDATED, EVENT_UPDATE_TEXTURES, EVENT_DELETED, EVENT_MODIFY_TEXTURE_ATTRIBUTE, EVENT_CHANGED, EVENT_NEW_ITEM, EVENT_ITEM_REMOVED } from '../core/events.js';
 import { Utils } from '../core/utils.js';
-import { WallTypes, TEXTURE_DEFAULT_REPEAT, TEXTURE_PROPERTY_REPEAT, TEXTURE_PROPERTY_COLOR, TEXTURE_PROPERTY_ROTATE, TEXTURE_PROPERTY_REFLECTIVE, TEXTURE_PROPERTY_SHININESS, WALL_STANDARD_THICKNESS, WALL_OFFSET_THICKNESS } from '../core/constants.js';
+import { WallTypes, TEXTURE_DEFAULT_REPEAT, TEXTURE_PROPERTY_REPEAT, TEXTURE_PROPERTY_COLOR, TEXTURE_PROPERTY_ROTATE, TEXTURE_PROPERTY_REFLECTIVE, TEXTURE_PROPERTY_SHININESS, WALL_OFFSET_THICKNESS } from '../core/constants.js';
 
 /**
  * Half Edges are created by Room.
@@ -657,18 +657,14 @@ export class HalfEdge extends EventDispatcher {
 
         let f = null,
             g = null,
-            o_f = null,
-            o_g = null,
-            w = null,
-            f3 = null,
-            g3 = null,
-            axis3 = null;
-        let dot = 0, abs_dot = 0.0, dot_acos = 0.0, abs_dot_acos = 0.0, magnitude = 0.0, theta = 0.0;
+            w = null
+           
+        let dot = 0, abs_dot = 0.0,  abs_dot_acos = 0.0, magnitude = 0.0, theta = 0.0;
 
         f = v1.getEnd().location.clone().sub(v1.getStart().location).normalize();
         g = v2.getEnd().location.clone().sub(v2.getStart().location).normalize();
-        o_f = f.clone();
-        o_g = g.clone();
+      //  o_f = f.clone();
+      //  o_g = g.clone();
 
         dot = f.dot(g);
         abs_dot = -dot;//Equivalent to 180 - degrees(math.cos(dot))
@@ -682,9 +678,9 @@ export class HalfEdge extends EventDispatcher {
             return w;
         }
 
-        f3 = new Vector3(f.x, f.y, 0.0);
-        g3 = new Vector3(g.x, g.y, 0.0);
-        axis3 = f3.clone().cross(g3);
+     //   f3 = new Vector3(f.x, f.y, 0.0);
+     //   g3 = new Vector3(g.x, g.y, 0.0);
+      //  axis3 = f3.clone().cross(g3);
 
         // if(axis3.z < 0){
         //     f = f.negate();//.multiplyScalar(-1);
@@ -695,11 +691,11 @@ export class HalfEdge extends EventDispatcher {
 
         f = f.multiplyScalar(v2.wall.thickness);
         g = g.multiplyScalar(v1.wall.thickness);
-        o_f = o_f.multiplyScalar(v2.wall.thickness);
-        o_g = o_g.multiplyScalar(v1.wall.thickness);
+    //    o_f = o_f.multiplyScalar(v2.wall.thickness);
+    //    o_g = o_g.multiplyScalar(v1.wall.thickness);
 
 
-        dot_acos = Math.acos(dot);
+       // dot_acos = Math.acos(dot);
         abs_dot_acos = Math.acos(abs_dot);
         // magnitude = Math.sqrt((Math.pow(f.length(),2) + Math.pow(g.length(), 2)) + (2 * f.length() * g.length() * abs_dot));
         magnitude = ((f.length() ** 2 + g.length() ** 2) + (2 * f.length() * g.length() * abs_dot)) ** 0.5;
@@ -707,8 +703,8 @@ export class HalfEdge extends EventDispatcher {
         w = (f.clone().rotateAround(new Vector2(), -theta)).normalize().multiplyScalar(magnitude);
 
         if (debug) {
-            let w3 = f3.clone().add(g3);
-            let angle3 = w3.angleTo(f3);
+          //  let w3 = f3.clone().add(g3);
+          //  let angle3 = w3.angleTo(f3);
             // console.log('==============================================');
             // console.log('F :: ', f);
             // console.log('G :: ', g);
@@ -735,8 +731,8 @@ export class HalfEdge extends EventDispatcher {
      */
 
     interiorPointByEdgesOLD(v1, v2) {
-        let directionSelf = null,
-            directionOther = null;
+        let directionSelf = null
+            
         if (!v1 || !v2) {
             if (!v1) {
                 directionSelf = this.getEnd().location.clone().sub(this.getStart().location).normalize();
